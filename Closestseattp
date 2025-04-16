@@ -1,0 +1,35 @@
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+local function getDistance(pos1, pos2)
+	return (pos1 - pos2).Magnitude
+end
+
+local seats = {}
+for _, obj in ipairs(workspace:GetDescendants()) do
+	if obj:IsA("Seat") or obj:IsA("VehicleSeat") then
+		table.insert(seats, obj)
+	end
+end
+
+local playerPos = hrp.Position
+table.sort(seats, function(a, b)
+	return getDistance(playerPos, a.Position) < getDistance(playerPos, b.Position)
+end)
+
+if #seats >= 1 then
+	local seat = seats[1]
+	hrp.CFrame = seat.CFrame + Vector3.new(0, 3, 0)
+	
+	local timeout = 2
+	local elapsed = 0
+	while humanoid.SeatPart ~= seat and elapsed < timeout do
+		wait(0.1)
+		elapsed += 0.1
+	end
+else
+	warn("No seats found!")
+end
